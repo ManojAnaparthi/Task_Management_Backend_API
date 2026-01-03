@@ -1,19 +1,32 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth, tasks
 
-from app.db.session import SessionLocal
+app = FastAPI(
+    title="Task Management API",
+    description="Production-ready backend with JWT auth and token rotation",
+    version="1.0.0"
+)
 
-app = FastAPI(title="Task Management Backend")
+# CORS - Update origins for production
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Update with your frontend URLs in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth.router)
 app.include_router(tasks.router)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@app.get("/")
+def root():
+    return {
+        "message": "Task Management API",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 @app.get("/health")
 def health_check():

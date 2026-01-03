@@ -76,6 +76,62 @@ A production-ready FastAPI backend with JWT authentication, refresh token rotati
 - `offset` (0+) - Skip results
 - `status` (todo/in_progress/done) - Filter by status
 
+## Architecture
+
+### Authentication & Authorization
+
+**Access Token (JWT)**
+- Short-lived (15 minutes)
+- Stored client-side (memory/sessionStorage)
+- Included in `Authorization: Bearer <token>` header
+- Contains user ID in `sub` claim
+
+**Refresh Token (JWT)**
+- Long-lived (7 days)
+- Includes unique token ID (`jti` claim)
+- Hashed and stored in database
+- Enables token rotation and revocation
+
+**Token Rotation Flow**
+1. Client requests refresh with refresh token
+2. Server validates token and checks if revoked
+3. Old token is immediately revoked
+4. New access + refresh tokens issued
+5. Old refresh token cannot be reused (401 error)
+
+**Security Features**
+- Reuse detection: Old tokens are revoked after use
+- Database-backed revocation: Logout invalidates tokens
+- Ownership enforcement: Users can only access their own data
+- Role-based access control: Admin vs user permissions
+
+### Database Schema
+
+```
+users
+├── id (UUID, PK)
+├── email (unique, indexed)
+├── hashed_password
+├── role (user | admin)
+└── is_active
+
+tasks
+├── id (UUID, PK)
+├── title
+├── description
+├── status (todo | in_progress | done)
+├── owner_id (FK → users.id)
+└── created_at (indexed with owner_id)
+
+refresh_tokens
+├── id (UUID, PK) -- matches jti claim
+├── user_id (FK → users.id)
+├── token_hash
+├── expires_at
+├── revoked
+└── created_at
+```
+
 ## Security
 
 - Passwords hashed with bcrypt
@@ -83,6 +139,57 @@ A production-ready FastAPI backend with JWT authentication, refresh token rotati
 - Refresh token rotation (prevents reuse)
 - Database-backed token revocation
 - Environment-based configuration
+
+## Production Deployment
+
+### Option 1: Render / Railway / Fly.io
+
+1. **Set Environment Variables:**
+   ```bash
+   DATABASE_URL=<your-postgres-url>
+   SECRET_KEY=<generate-with-openssl-rand-hex-32>
+   ```
+
+2. **Start Command:**
+   ```bash
+   gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+   ```
+
+3. **Run Migrations (on first deploy):**
+   ```bash
+   alembic upgrade head
+   ```
+
+### Option 2: Docker
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["gunicorn", "app.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+```
+
+### Production Checklist
+
+✅ PostgreSQL database (managed service recommended)  
+✅ Environment variables for all secrets  
+✅ HTTPS enabled (platform default)  
+✅ Run `alembic upgrade head` after deploy  
+✅ Set strong `SECRET_KEY` (min 32 characters)  
+✅ CORS configured if needed  
+✅ Logs monitored  
+
+### API Documentation
+
+Once deployed, access interactive API docs at:
+- **Swagger UI:** `https://your-domain.com/docs`
+- **ReDoc:** `https://your-domain.com/redoc`
 
 ## Production Deployment
 

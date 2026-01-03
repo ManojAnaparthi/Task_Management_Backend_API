@@ -1,0 +1,14 @@
+.git
+.env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.coverage
+*.pytest_cache
+.vscode
+.idea
+test_*.py
+create_db.py
