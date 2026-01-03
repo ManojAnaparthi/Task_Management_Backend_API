@@ -359,6 +359,11 @@ curl -X 'POST' \
 
 **Response:** `204 No Content`
 
+#### 10. Get Root
+![Get Root](screenshots/10-get-root.png)
+
+#### 11. Health Check
+![Get Root](screenshots/11-health-check.png)
 
 ### Security Features Demonstrated
 
