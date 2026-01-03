@@ -17,9 +17,10 @@ from app.core.security import (
     ALGORITHM
 )
 
-def register_user(db: Session, email: str, password: str):
+def register_user(db: Session, email: str, password: str, name: str = None):
     user = User(
         email=email,
+        name=name,
         hashed_password=hash_password(password)
     )
     db.add(user)

@@ -16,7 +16,7 @@ def get_db():
 
 @router.post("/register", response_model=TokenResponse)
 def register(data: UserCreate, db: Session = Depends(get_db)):
-    user = register_user(db, data.email, data.password)
+    user = register_user(db, data.email, data.password, data.name)
     access, refresh = issue_tokens(db, user)
     return {
         "access_token": access,
