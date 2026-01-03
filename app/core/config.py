@@ -1,7 +1,11 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:4056@localhost:5432/taskdb"
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/taskdb"
+    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     class Config:
         env_file = ".env"
