@@ -21,5 +21,5 @@ EXPOSE 8000
 COPY prestart.sh /app/prestart.sh
 RUN chmod +x /app/prestart.sh
 
-# Run migrations then start gunicorn
-CMD ["/bin/bash", "-c", "/app/prestart.sh && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"]
+# Run migrations then start gunicorn (using sh instead of bash)
+CMD ["/bin/sh", "-c", "/app/prestart.sh && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"]
