@@ -2,6 +2,12 @@
 
 A production-ready FastAPI backend with JWT authentication, refresh token rotation, and role-based access control.
 
+## 🔗 Live API
+
+**Swagger Docs:** https://task-management-api-o1ly.onrender.com/docs
+
+Test the API directly in your browser with interactive documentation!
+
 ## Features
 
 - ✅ User registration and authentication
@@ -190,6 +196,192 @@ CMD ["gunicorn", "app.main:app", "--workers", "4", "--worker-class", "uvicorn.wo
 Once deployed, access interactive API docs at:
 - **Swagger UI:** `https://your-domain.com/docs`
 - **ReDoc:** `https://your-domain.com/redoc`
+
+## Testing the API
+
+### Quick Start with Swagger UI
+
+1. **Visit the live Swagger docs:** https://task-management-api-o1ly.onrender.com/docs
+
+![Swagger Homepage](screenshots/01-swagger-homepage.png)
+
+### Step-by-Step Testing Flow
+
+#### 1. Register a New User
+
+Click on `POST /auth/register`, then "Try it out":
+
+```bash
+{
+  "email": "test@example.com",
+  "password": "securePass123",
+  "name": "Test User"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+![Register User](screenshots/02-register-user.png)
+
+#### 2. Login (Get Tokens)
+
+Use the **Authorize** button (green lock icon) in Swagger:
+- **Username:** test@example.com (your email)
+- **Password:** securePass123
+
+Or use the login endpoint directly:
+
+```bash
+curl -X 'POST' \
+  'https://task-management-api-o1ly.onrender.com/auth/login' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=test@example.com&password=securePass123'
+```
+
+![Login](screenshots/03-login.png)
+
+#### 3. Authorize in Swagger
+
+After login, click the **Authorize** button and Swagger will automatically attach your token to all requests.
+
+![Authorize](screenshots/04-authorize-button.png)
+
+#### 4. Create a Task
+
+Now you can access protected endpoints! Create your first task:
+
+```bash
+{
+  "title": "Complete API Testing",
+  "description": "Test all CRUD operations",
+  "status": "todo"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446xxxxxxxx",
+  "title": "Complete API Testing",
+  "description": "Test all CRUD operations",
+  "status": "todo"
+}
+```
+
+![Create Task](screenshots/05-create-task.png)
+
+#### 5. Get All Tasks (Pagination)
+
+List tasks with pagination:
+
+```bash
+curl -X 'GET' \
+  'https://task-management-api-o1ly.onrender.com/tasks?limit=10&offset=0' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+**With status filter:**
+```bash
+curl -X 'GET' \
+  'https://task-management-api-o1ly.onrender.com/tasks?limit=10&offset=0&status=todo' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+![Get Tasks](screenshots/06-get-tasks.png)
+
+#### 6. Update a Task
+
+Update task status:
+
+```bash
+curl -X 'PUT' \
+  'https://task-management-api-o1ly.onrender.com/tasks/550e8400-e29b-41d4-a716-446655440000' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "status": "in_progress"
+}'
+```
+
+![Update Task](screenshots/07-update-task.png)
+![See updated Task](screenshots/07b-see-update.png)
+
+#### 7. Refresh Token (Token Rotation)
+
+When your access token expires (15 minutes), use the refresh token:
+
+```bash
+curl -X 'POST' \
+  'https://task-management-api-o1ly.onrender.com/auth/refresh' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "refresh_token": "YOUR_REFRESH_TOKEN"
+}'
+```
+
+**Important:** The old refresh token is immediately revoked (can't be reused). You get new access + refresh tokens.
+
+![Refresh Token](screenshots/08-refresh-token.png)
+
+#### 8. Delete a Task
+
+Delete a task by ID:
+
+```bash
+curl -X 'DELETE' \
+  'https://task-management-api-o1ly.onrender.com/tasks/550e8400-e29b-41d4-a716-446655440000' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+**Response:** `204 No Content`
+
+![Delete Task](screenshots/09-delete-task.png)
+
+#### 9. Logout (Revoke Refresh Token)
+
+Revoke your refresh token:
+
+```bash
+curl -X 'POST' \
+  'https://task-management-api-o1ly.onrender.com/auth/logout' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "refresh_token": "YOUR_REFRESH_TOKEN"
+}'
+```
+
+**Response:** `204 No Content`
+
+
+### Security Features Demonstrated
+
+✅ **Token Rotation** - Refresh tokens can only be used once  
+✅ **Ownership Enforcement** - Users can only access their own tasks  
+✅ **Automatic Authorization** - Swagger Authorize button handles token management  
+✅ **Pagination** - Limit results (1-100 per page)  
+✅ **Filtering** - Filter tasks by status (todo/in_progress/done)  
+✅ **Proper HTTP Status Codes** - 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 204 (No Content)
+
+### Testing Checklist
+
+- [ ] Register a new user
+- [ ] Login and get tokens
+- [ ] Create multiple tasks
+- [ ] List tasks with pagination
+- [ ] Filter tasks by status
+- [ ] Update task status
+- [ ] Try accessing another user's task (should get 404)
+- [ ] Refresh access token
+- [ ] Try reusing old refresh token (should get 401)
+- [ ] Delete a task
+- [ ] Logout and verify token is revoked
 
 ## Production Deployment
 

@@ -15,7 +15,7 @@ def create(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    return create_task(db, user, data.title, data.description)
+    return create_task(db, user, data.title, data.description, data.status)
 
 @router.get("", response_model=list[TaskOut])
 def list_tasks(

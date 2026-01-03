@@ -3,10 +3,11 @@ from app.models.task import Task
 from app.models.user import User
 from sqlalchemy.orm import Session
 
-def create_task(db: Session, user: User, title: str, description: str):
+def create_task(db: Session, user: User, title: str, description: str, status: str = "todo"):
     task = Task(
         title=title,
         description=description,
+        status=status,
         owner_id=user.id
     )
     db.add(task)
