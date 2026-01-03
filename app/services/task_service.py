@@ -14,8 +14,26 @@ def create_task(db: Session, user: User, title: str, description: str):
     db.refresh(task)
     return task
 
-def get_tasks(db: Session, user: User):
-    return db.query(Task).filter(Task.owner_id == user.id).all()
+def get_tasks(
+    db: Session,
+    user: User,
+    limit: int = 10,
+    offset: int = 0,
+    status: str | None = None
+):
+    query = db.query(Task).filter(Task.owner_id == user.id)
+
+    if status:
+        query = query.filter(Task.status == status)
+
+    return (
+        query
+        .order_by(Task.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
 
 def get_task_or_404(db: Session, task_id, user: User):
     task = (

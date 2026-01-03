@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from typing import List
+from fastapi import APIRouter, Depends, Query
+from typing import List, Literal
 from sqlalchemy.orm import Session
 from uuid import UUID
 from app.api.dependencies import get_current_user, get_db
@@ -17,12 +17,15 @@ def create(
 ):
     return create_task(db, user, data.title, data.description)
 
-@router.get("", response_model=List[TaskOut])
+@router.get("", response_model=list[TaskOut])
 def list_tasks(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    status: Literal["todo", "in_progress", "done"] | None = Query(None)
 ):
-    return get_tasks(db, user)
+    return get_tasks(db, user, limit, offset, status)
 
 @router.put("/{task_id}", response_model=TaskOut)
 def update(

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal
 from uuid import UUID
 
 class TaskCreate(BaseModel):
@@ -16,6 +16,6 @@ class TaskOut(BaseModel):
         orm_mode = True
 
 class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    status: Literal["todo", "in_progress", "done"] | None = None
