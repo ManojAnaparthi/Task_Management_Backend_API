@@ -101,8 +101,8 @@ Thumbs.db
 *.backup
 
 # Test scripts (optional - uncomment if you don't want to commit test files)
-test_*.py
-*_test.py
+# test_*.py
+# *_test.py
 
 # Database creation script (optional)
 create_db.py
